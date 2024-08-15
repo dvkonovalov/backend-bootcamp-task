@@ -1,0 +1,6 @@
+env: "local"
+storage_path: "user=postgres password=12345678 dbname=postgres sslmode=disable"
+http_server:
+  address: "127.0.0.1:4000"
+  timeout: 1s
+  idle_timeout: 60s
