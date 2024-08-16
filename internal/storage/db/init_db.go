@@ -45,6 +45,19 @@ func NewStorage(storagePath string) (*Storage, error) {
 		return nil, fmt.Errorf("%s : %s", "Failed to create Apartments table", err)
 	}
 
+	sqlRequest = `CREATE TABLE IF NOT EXISTS Users (
+		id SERIAL PRIMARY KEY,
+		email TEXT,
+		password_hash TEXT NOT NULL,
+		user_type TEXT NOT NULL
+	);
+    `
+
+	err = CreateTable(sqlRequest, db)
+	if err != nil {
+		return nil, fmt.Errorf("%s : %s", "Failed to create Users table", err)
+	}
+
 	return &Storage{db: db}, nil
 
 }

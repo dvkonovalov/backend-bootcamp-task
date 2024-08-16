@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"log/slog"
 	"main/internal/config"
+	"main/internal/http_server/urls/auth"
 	"main/internal/http_server/urls/flat"
 	"main/internal/http_server/urls/house"
 	"main/internal/storage/db"
@@ -38,6 +39,9 @@ func main() {
 	router.HandleFunc("/flat/create", flat.Create(log, storage))
 	router.HandleFunc("/flat/update", flat.Update(log, storage))
 	router.HandleFunc("/house/{id}", house.GetFlats(log, storage))
+	router.HandleFunc("/dummyLogin", auth.CreateToken(log))
+	router.HandleFunc("/register", auth.CreateUser(log, storage))
+	router.HandleFunc("/login", auth.LoginUser(log, storage))
 
 	// Starting server
 	log.Info("Starting server", slog.String("address", cnf.HttpServer.Address))
