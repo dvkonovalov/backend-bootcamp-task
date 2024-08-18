@@ -61,7 +61,7 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5432
         run: |
-          go test -race -covermode atomic -coverprofile=covprofile ./... ./tests/... 
+          go test -race -coverprofile=covprofile ./... ./tests/... 
 
       - name: Stop server
         run: kill $(cat server.pid)
