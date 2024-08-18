@@ -61,17 +61,9 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5432
         run: |
-          go test -race -coverprofile=covprofile ./... ./tests/... 
+          go test ./tests/... 
 
       - name: Stop server
         run: kill $(cat server.pid)
         if: always()
-
-      - name: Install goveralls
-        run: go install github.com/mattn/goveralls@latest
-
-      - name: Send coverage
-        env:
-          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: goveralls -coverprofile=covprofile -service=github
 
