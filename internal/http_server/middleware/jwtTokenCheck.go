@@ -5,12 +5,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"main/internal/storage/api"
 	"net/http"
+	"os"
 	"strings"
 )
 
 func CheckJWTToken(r *http.Request) (string, error) {
 	authHeader := r.Header.Get("Authorization")
-	mySecretKey := []byte("secret")
+	//mySecretKey := []byte("secret")
+	mySecretKey := []byte(os.Getenv("JWT_SECRET_KEY"))
 	if authHeader == "" {
 		return "", fmt.Errorf("Authorization header is missing")
 	}

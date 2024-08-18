@@ -10,10 +10,6 @@ import (
 	"testing"
 )
 
-type ResponseBody struct {
-	Token string `json:"token"`
-}
-
 type ResponseBodyCreate struct {
 	Id      int    `json:"id"`
 	HouseId int    `json:"house_id"`

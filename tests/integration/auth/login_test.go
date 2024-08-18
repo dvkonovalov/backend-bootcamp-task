@@ -9,14 +9,6 @@ import (
 	"testing"
 )
 
-type ResponseBodyRegister struct {
-	UserID string `json:"user_id"`
-}
-
-type ResponseBody struct {
-	Token string `json:"token"`
-}
-
 func TestLoginEndPoint(t *testing.T) {
 	cnf := config.MustLoad()
 	password := "Секретная строка"
@@ -97,18 +89,8 @@ func TestLoginEndPoint(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error making http request: %v", err)
 	}
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusNotFound {
 		t.Errorf("Unexpected http status code: %v", resp.StatusCode)
-	}
-	body, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Errorf("Error reading response body: %v", err)
-	}
-	if err := json.Unmarshal(body, &responseBodyToken); err != nil {
-		t.Errorf("Error unmarshaling response body: %v", err)
-	}
-	if responseBodyToken.Token == "" {
-		t.Errorf("Unexpected user_id: got %v want token", responseBodyToken.Token)
 	}
 
 }

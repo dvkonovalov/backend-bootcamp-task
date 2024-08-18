@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"log/slog"
 	"main/internal/config"
@@ -25,13 +26,19 @@ func main() {
 	log.Info("Logger start!", slog.String("env", cnf.Env))
 
 	// Load Database
-	storage, err := db.NewStorage(cnf.StoragePath)
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		dbHost, dbPort, dbUser, dbPassword, dbName)
+	storage, err := db.NewStorage(dsn)
 	if err != nil {
 		log.Error("Failed to create storage", err)
 		os.Exit(1)
 	}
-
-	_ = storage
 
 	// Config Router
 	router := mux.NewRouter()

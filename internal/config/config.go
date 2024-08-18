@@ -8,9 +8,8 @@ import (
 )
 
 type Config struct {
-	Env         string     `yaml:"env" env-default:"production" env-required:"true"`
-	StoragePath string     `yaml:"storage_path" env-required:"true"`
-	HttpServer  HTTPServer `yaml:"http_server" env-required:"true"`
+	Env        string     `yaml:"env" env-default:"production" env-required:"true"`
+	HttpServer HTTPServer `yaml:"http_server" env-required:"true"`
 }
 
 type HTTPServer struct {
@@ -20,8 +19,7 @@ type HTTPServer struct {
 }
 
 func MustLoad() *Config {
-	configPath := os.Getenv("CONFIG_PATH")
-	configPath = "D:\\GoProjects\\backend-bootcamp-task\\config\\local.yaml"
+	configPath := "./config/local.yaml"
 	if configPath == "" {
 		log.Fatal("CONFIG_PATH environment variable not set")
 	}

@@ -15,14 +15,6 @@ type ResponseBody struct {
 	Token string `json:"token"`
 }
 
-type ResponseBodyCreate struct {
-	Id      int    `json:"id"`
-	HouseId int    `json:"house_id"`
-	Price   int    `json:"price"`
-	Rooms   int    `json:"rooms"`
-	Status  string `json:"status"`
-}
-
 func TestUpdateEndPoint(t *testing.T) {
 	cnf := config.MustLoad()
 	body := []byte(`{"user_type":"moderator"}`)

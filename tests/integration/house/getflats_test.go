@@ -10,10 +10,6 @@ import (
 	"testing"
 )
 
-type ResponseBody struct {
-	Token string `json:"token"`
-}
-
 type ResponseBodyCreateHouse struct {
 	Id        int    `json:"id"`
 	Address   string `json:"address"`
