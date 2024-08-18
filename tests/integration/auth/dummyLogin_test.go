@@ -15,7 +15,7 @@ type ResponseBody struct {
 func TestDummyLoginEndPoint(t *testing.T) {
 	body := []byte(`{"user_type":"client"}`)
 	rbody := bytes.NewReader(body)
-	req, err := http.NewRequest("GET", "http://0.0.0.0:8080/dummyLogin", rbody)
+	req, err := http.NewRequest("GET", "http://127.0.0.1:8080/dummyLogin", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -44,7 +44,7 @@ func TestDummyLoginEndPoint(t *testing.T) {
 	// ПРОВЕРКА МОДЕРАТОРА
 	body = []byte(`{"user_type":"moderator"}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/dummyLogin", rbody)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/dummyLogin", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -72,7 +72,7 @@ func TestDummyLoginEndPoint(t *testing.T) {
 	// НЕВЕРНЫЕ ДАННЫЕ
 	body = []byte(`{"user_type":"test"}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/dummyLogin", rbody)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/dummyLogin", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}

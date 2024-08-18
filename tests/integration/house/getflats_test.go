@@ -34,7 +34,7 @@ func TestGetFlatsEndPoint(t *testing.T) {
 	// Получаем токен
 	body := []byte(`{"user_type":"moderator"}`)
 	rbody := bytes.NewReader(body)
-	req, err := http.NewRequest("GET", "http://0.0.0.0:8080/dummyLogin", rbody)
+	req, err := http.NewRequest("GET", "http://127.0.0.1:8080/dummyLogin", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -64,7 +64,7 @@ func TestGetFlatsEndPoint(t *testing.T) {
 	  "developer": "Мэрия города"
 	}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/house/create", rbody)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/house/create", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -92,7 +92,7 @@ func TestGetFlatsEndPoint(t *testing.T) {
 	  "rooms": 4
 	}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/flat/create", rbody)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/flat/create", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -118,7 +118,7 @@ func TestGetFlatsEndPoint(t *testing.T) {
 	  "rooms": 3
 	}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/flat/create", rbody)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/flat/create", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -140,7 +140,7 @@ func TestGetFlatsEndPoint(t *testing.T) {
 	}
 
 	// Нормальный запрос
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/house/"+strconv.Itoa(responseBodyCreateHouse.Id), nil)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/house/"+strconv.Itoa(responseBodyCreateHouse.Id), nil)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -172,7 +172,7 @@ func TestGetFlatsEndPoint(t *testing.T) {
 	}
 
 	// Неавторизованный доступ
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/house/"+strconv.Itoa(responseBodyCreateHouse.Id), nil)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/house/"+strconv.Itoa(responseBodyCreateHouse.Id), nil)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}

@@ -17,7 +17,7 @@ type ResponseBody struct {
 func TestUpdateEndPoint(t *testing.T) {
 	body := []byte(`{"user_type":"moderator"}`)
 	rbody := bytes.NewReader(body)
-	req, err := http.NewRequest("GET", "http://0.0.0.0:8080/dummyLogin", rbody)
+	req, err := http.NewRequest("GET", "http://127.0.0.1:8080/dummyLogin", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -45,7 +45,7 @@ func TestUpdateEndPoint(t *testing.T) {
 	  "rooms": 4
 	}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/flat/create", rbody)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/flat/create", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -71,7 +71,7 @@ func TestUpdateEndPoint(t *testing.T) {
   		"status": "approved"
 	}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/flat/update", rbody)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/flat/update", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -101,7 +101,7 @@ func TestUpdateEndPoint(t *testing.T) {
 	}
 
 	// Неавторизованный доступ
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/flat/create", rbody)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/flat/create", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}

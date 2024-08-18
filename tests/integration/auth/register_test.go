@@ -19,7 +19,7 @@ func TestRegisterEndPoint(t *testing.T) {
   "user_type": "moderator"
 }`)
 	rbody := bytes.NewReader(body)
-	req, err := http.NewRequest("GET", "http://0.0.0.0:8080/register", rbody)
+	req, err := http.NewRequest("GET", "http://127.0.0.1:8080/register", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -52,7 +52,7 @@ func TestRegisterEndPoint(t *testing.T) {
   "user_type": "test"
 }`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/register", rbody)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/register", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
