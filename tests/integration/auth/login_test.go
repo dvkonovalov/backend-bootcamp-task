@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"main/internal/config"
 	"net/http"
 	"testing"
 )
 
 func TestLoginEndPoint(t *testing.T) {
-	cnf := config.MustLoad()
 	password := "Секретная строка"
 	body := []byte(`{
   "email": "test@gmail.com",
@@ -18,7 +16,7 @@ func TestLoginEndPoint(t *testing.T) {
   "user_type": "moderator"
 }`)
 	rbody := bytes.NewReader(body)
-	req, err := http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/register", rbody)
+	req, err := http.NewRequest("GET", "http://0.0.0.0:8080/register", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -49,7 +47,7 @@ func TestLoginEndPoint(t *testing.T) {
 	  "password": "` + password + `"
 	}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/login", rbody)
+	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/login", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -81,7 +79,7 @@ func TestLoginEndPoint(t *testing.T) {
 	  "password": "` + password + `"
 	}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/login", rbody)
+	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/login", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}

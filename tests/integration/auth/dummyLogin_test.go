@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"main/internal/config"
 	"net/http"
 	"testing"
 )
@@ -14,10 +13,9 @@ type ResponseBody struct {
 }
 
 func TestDummyLoginEndPoint(t *testing.T) {
-	cnf := config.MustLoad()
 	body := []byte(`{"user_type":"client"}`)
 	rbody := bytes.NewReader(body)
-	req, err := http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/dummyLogin", rbody)
+	req, err := http.NewRequest("GET", "http://0.0.0.0:8080/dummyLogin", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -46,7 +44,7 @@ func TestDummyLoginEndPoint(t *testing.T) {
 	// ПРОВЕРКА МОДЕРАТОРА
 	body = []byte(`{"user_type":"moderator"}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/dummyLogin", rbody)
+	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/dummyLogin", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -74,7 +72,7 @@ func TestDummyLoginEndPoint(t *testing.T) {
 	// НЕВЕРНЫЕ ДАННЫЕ
 	body = []byte(`{"user_type":"test"}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/dummyLogin", rbody)
+	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/dummyLogin", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}

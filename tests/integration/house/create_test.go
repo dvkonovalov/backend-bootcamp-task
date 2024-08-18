@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"main/internal/config"
 	"net/http"
 	"testing"
 )
@@ -23,10 +22,9 @@ type ResponseBodyCreate struct {
 }
 
 func TestCreateEndPoint(t *testing.T) {
-	cnf := config.MustLoad()
 	body := []byte(`{"user_type":"moderator"}`)
 	rbody := bytes.NewReader(body)
-	req, err := http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/dummyLogin", rbody)
+	req, err := http.NewRequest("GET", "http://0.0.0.0:8080/dummyLogin", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -56,7 +54,7 @@ func TestCreateEndPoint(t *testing.T) {
 	  "developer": "Мэрия города"
 	}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/house/create", rbody)
+	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/house/create", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -93,7 +91,7 @@ func TestCreateEndPoint(t *testing.T) {
 	}
 
 	// Неавторизованный доступ
-	req, err = http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/house/create", rbody)
+	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/house/create", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}

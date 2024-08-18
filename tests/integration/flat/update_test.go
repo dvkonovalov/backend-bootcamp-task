@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"main/internal/config"
 	"main/internal/storage/api"
 	"net/http"
 	"strconv"
@@ -16,10 +15,9 @@ type ResponseBody struct {
 }
 
 func TestUpdateEndPoint(t *testing.T) {
-	cnf := config.MustLoad()
 	body := []byte(`{"user_type":"moderator"}`)
 	rbody := bytes.NewReader(body)
-	req, err := http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/dummyLogin", rbody)
+	req, err := http.NewRequest("GET", "http://0.0.0.0:8080/dummyLogin", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -47,7 +45,7 @@ func TestUpdateEndPoint(t *testing.T) {
 	  "rooms": 4
 	}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/flat/create", rbody)
+	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/flat/create", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -73,7 +71,7 @@ func TestUpdateEndPoint(t *testing.T) {
   		"status": "approved"
 	}`)
 	rbody = bytes.NewReader(body)
-	req, err = http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/flat/update", rbody)
+	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/flat/update", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
@@ -103,7 +101,7 @@ func TestUpdateEndPoint(t *testing.T) {
 	}
 
 	// Неавторизованный доступ
-	req, err = http.NewRequest("GET", "http://"+cnf.HttpServer.Address+"/flat/create", rbody)
+	req, err = http.NewRequest("GET", "http://0.0.0.0:8080/flat/create", rbody)
 	if err != nil {
 		t.Errorf("Error creating http request: %v", err)
 	}
