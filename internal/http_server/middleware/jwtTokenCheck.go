@@ -10,9 +10,9 @@ import (
 
 func CheckJWTToken(r *http.Request) (string, error) {
 	authHeader := r.Header.Get("Authorization")
-	var mySecretKey []byte
+	mySecretKey := []byte("secret")
 	if authHeader == "" {
-		return "", nil
+		return "", fmt.Errorf("Authorization header is missing")
 	}
 
 	tokenString := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))

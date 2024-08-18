@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
 	"log/slog"
+	"main/internal/http_server/middleware"
 	"main/internal/storage/api"
 	"net/http"
 )
@@ -24,11 +25,20 @@ type FlatCreator interface {
 
 func Create(log *slog.Logger, flatCreater FlatCreator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		userStatus, err := middleware.CheckJWTToken(r)
+		if err != nil {
+			log.Warn("Invalid token", "err", err)
+		}
+		if userStatus != api.Client && userStatus != api.Moderator {
+			log.Info("unauthorized access attempt to flat/create", "userStatus", userStatus)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
 		var req Request_create
-		err := render.DecodeJSON(r.Body, &req)
+		err = render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("fail to decode body", "err", err)
-			render.JSON(w, r, api.Error("failed to decode request."))
+			http.Error(w, "fail to decode body", http.StatusInternalServerError)
 			return
 		}
 		log.Info("request body decoded", slog.Any("req", req))
@@ -37,7 +47,7 @@ func Create(log *slog.Logger, flatCreater FlatCreator) http.HandlerFunc {
 		if err != nil {
 			validatorErr := err.(validator.ValidationErrors)
 			log.Error("fail to validate body", "err", validatorErr)
-			render.JSON(w, r, api.ValidationError(validatorErr))
+			http.Error(w, "fail to validate body", http.StatusBadRequest)
 			return
 		}
 		var new_flat api.Flat
@@ -48,7 +58,7 @@ func Create(log *slog.Logger, flatCreater FlatCreator) http.HandlerFunc {
 		)
 		if err != nil {
 			log.Error("fail to create flat", "err", err)
-			render.JSON(w, r, "failed to create flat")
+			http.Error(w, "fail to create flat", http.StatusInternalServerError)
 			return
 		}
 		log.Info("created flat", "new_flat", new_flat)

@@ -8,7 +8,7 @@ import (
 
 func CreateJWTToken(username string, userType string) (string, error) {
 	mySecretKey := []byte("secret")
-	claims := api.Claims{Status: username, Username: userType}
+	claims := api.Claims{Status: userType, Username: username}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Подписываем токен нашим секретным ключем

@@ -28,7 +28,7 @@ func CreateUser(log *slog.Logger, userRegister UserRegister) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("fail to decode body", "err", err)
-			render.JSON(w, r, api.Error("failed to decode request."))
+			http.Error(w, "fail to decode body", http.StatusInternalServerError)
 			return
 		}
 		log.Info("request body decoded", slog.Any("req", req))
@@ -37,14 +37,20 @@ func CreateUser(log *slog.Logger, userRegister UserRegister) http.HandlerFunc {
 		if err != nil {
 			validatorErr := err.(validator.ValidationErrors)
 			log.Error("fail to validate body", "err", validatorErr)
-			render.JSON(w, r, api.ValidationError(validatorErr))
+			http.Error(w, "Not found required data", http.StatusBadRequest)
+			return
+		}
+
+		if req.UserType != api.Created && req.UserType != api.Moderator {
+			log.Info("invalid user type in register", "type", req.UserType)
+			http.Error(w, "invalid user type", http.StatusBadRequest)
 			return
 		}
 
 		id, err := userRegister.CreateUser(req.Email, req.Password, req.UserType)
 		if err != nil {
 			log.Error("fail to create user", "err", err)
-			render.JSON(w, r, "fail to create user")
+			http.Error(w, "fail to create user", http.StatusInternalServerError)
 			return
 		}
 		render.JSON(w, r, ResponseRegister{UserId: id})

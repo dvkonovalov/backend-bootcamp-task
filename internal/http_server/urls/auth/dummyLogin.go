@@ -32,20 +32,20 @@ func CreateToken(log *slog.Logger) http.HandlerFunc {
 		if err != nil {
 			validatorErr := err.(validator.ValidationErrors)
 			log.Error("fail to validate body", "err", validatorErr)
-			render.JSON(w, r, api.ValidationError(validatorErr))
+			http.Error(w, "Not found user type", http.StatusBadRequest)
 			return
 		}
 
-		if req.UserType != "moderator" && req.UserType != "client" {
+		if req.UserType != api.Client && req.UserType != api.Moderator {
 			log.Warn("Invalid user type", "type", req.UserType)
-			render.JSON(w, r, "Invalid user type.")
+			http.Error(w, "Invalid user type", http.StatusBadRequest)
 			return
 		}
 
 		tokenString, err := middleware.CreateJWTToken("Simple", req.UserType)
 		if err != nil {
 			log.Error("fail to create token", "err", err)
-			render.JSON(w, r, api.Error("failed to create token"))
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 

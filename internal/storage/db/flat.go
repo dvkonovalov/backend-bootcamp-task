@@ -37,3 +37,19 @@ func (storage *Storage) UpdateFlat(id int, status string) (api.Flat, error) {
 
 	return update_flat, nil
 }
+
+func (storage *Storage) GetStatus(id int) (string, error) {
+	var status string
+	stmt, err := storage.db.Prepare("SELECT status FROM Apartments WHERE id=$1;")
+	if err != nil {
+		return "", fmt.Errorf("Error preparing statement: %s", err)
+	}
+	err = stmt.QueryRow(status, id).Scan(&status)
+
+	if err != nil {
+		return "", fmt.Errorf("Error executing query: %s", err)
+	}
+
+	return status, nil
+
+}

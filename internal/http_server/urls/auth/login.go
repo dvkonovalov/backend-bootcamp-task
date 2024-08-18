@@ -4,7 +4,6 @@ import (
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
 	"log/slog"
-	"main/internal/storage/api"
 	"net/http"
 )
 
@@ -27,7 +26,7 @@ func LoginUser(log *slog.Logger, userLogin UserLogin) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("fail to decode body", "err", err)
-			render.JSON(w, r, api.Error("failed to decode request."))
+			http.Error(w, "fail to decode body", http.StatusInternalServerError)
 			return
 		}
 		log.Info("request body decoded", slog.Any("req", req))
@@ -36,14 +35,14 @@ func LoginUser(log *slog.Logger, userLogin UserLogin) http.HandlerFunc {
 		if err != nil {
 			validatorErr := err.(validator.ValidationErrors)
 			log.Error("fail to validate body", "err", validatorErr)
-			render.JSON(w, r, api.ValidationError(validatorErr))
+			http.Error(w, "fail to validate body", http.StatusBadRequest)
 			return
 		}
 
 		jwtToken, err := userLogin.LoginUser(req.Id, req.Password)
 		if err != nil {
 			log.Error("fail to login", "err", err)
-			render.JSON(w, r, "failed to login.")
+			http.Error(w, "fail to login", http.StatusNotFound)
 			return
 		}
 		render.JSON(w, r, ResponseLogin{Token: jwtToken})
