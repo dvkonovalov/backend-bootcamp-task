@@ -39,6 +39,9 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
+      - name: Run server
+        run: go build cmd/main.go
+
       - name: Run tests
         env:
           DB_USER: user
