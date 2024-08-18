@@ -1,5 +1,6 @@
 # backend-bootcamp-task
 
+[![ci.yml](https://github.com/dvkonovalov/backend-bootcamp-task/actions/workflows/ci.yml/badge.svg)](https://github.com/dvkonovalov/backend-bootcamp-task/actions/workflows/ci.yml)
 
 # Go Service with PostgreSQL
 
