@@ -7,7 +7,7 @@ import (
 
 func (storage *Storage) CreateFlat(houseId int, price int, rooms int) (api.Flat, error) {
 	var newFlat api.Flat
-	stmt, err := storage.db.Prepare("INSERT INTO Apartments (house_id, price, rooms, status) VALUES ($1, $2, $3, 'created') RETURNING id, house_id, price, rooms, status;")
+	stmt, err := storage.Db.Prepare("INSERT INTO Apartments (house_id, price, rooms, status) VALUES ($1, $2, $3, 'created') RETURNING id, house_id, price, rooms, status;")
 	if err != nil {
 		return newFlat, fmt.Errorf("error preparing statement: %s", err)
 	}
@@ -33,7 +33,7 @@ func (storage *Storage) UpdateFlat(id int, status string, moderator string) (api
 
 	if statusNow == api.OnModeration {
 		var moderatorNow string
-		stmt, err := storage.db.Prepare("SELECT moderator FROM Moderation WHERE flat_id=$1;")
+		stmt, err := storage.Db.Prepare("SELECT moderator FROM Moderation WHERE flat_id=$1;")
 		if err != nil {
 			return updateFlat, fmt.Errorf("error preparing statement: %s", err)
 		}
@@ -45,7 +45,7 @@ func (storage *Storage) UpdateFlat(id int, status string, moderator string) (api
 			return updateFlat, fmt.Errorf("this apartment is being moderated by %s, but %s wants to moderate it", moderatorNow, moderator)
 		}
 
-		stmt, err = storage.db.Prepare("UPDATE Apartments SET status=$1 WHERE id=$2 RETURNING id, house_id, price, rooms, status;")
+		stmt, err = storage.Db.Prepare("UPDATE Apartments SET status=$1 WHERE id=$2 RETURNING id, house_id, price, rooms, status;")
 		if err != nil {
 			return updateFlat, fmt.Errorf("error preparing statement: %s", err)
 		}
@@ -58,7 +58,7 @@ func (storage *Storage) UpdateFlat(id int, status string, moderator string) (api
 		return updateFlat, nil
 
 	} else {
-		stmt, err := storage.db.Prepare("UPDATE Apartments SET status=$1 WHERE id=$2 RETURNING id, house_id, price, rooms, status;")
+		stmt, err := storage.Db.Prepare("UPDATE Apartments SET status=$1 WHERE id=$2 RETURNING id, house_id, price, rooms, status;")
 		if err != nil {
 			return updateFlat, fmt.Errorf("error preparing statement: %s", err)
 		}
@@ -75,7 +75,7 @@ func (storage *Storage) UpdateFlat(id int, status string, moderator string) (api
 
 func (storage *Storage) GetStatus(id int) (string, error) {
 	var status string
-	stmt, err := storage.db.Prepare("SELECT status FROM Apartments WHERE id=$1;")
+	stmt, err := storage.Db.Prepare("SELECT status FROM Apartments WHERE id=$1;")
 	if err != nil {
 		return "", fmt.Errorf("error preparing statement: %s", err)
 	}
@@ -90,7 +90,7 @@ func (storage *Storage) GetStatus(id int) (string, error) {
 }
 
 func (storage *Storage) BlockModerationOtherAdmin(flatId int, moderator string) (bool, error) {
-	stmt, err := storage.db.Prepare("INSERT INTO Moderation(flat_id, moderator) VALUES ($1, $2);")
+	stmt, err := storage.Db.Prepare("INSERT INTO Moderation(flat_id, moderator) VALUES ($1, $2);")
 	if err != nil {
 		return false, fmt.Errorf("error preparing statement: %s", err)
 	}

@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	"main/internal/config"
 )
 
 type Storage struct {
-	db *sql.DB
+	Db *sql.DB
 }
 
 func NewStorage(storagePath string) (*Storage, error) {
@@ -71,7 +72,12 @@ func NewStorage(storagePath string) (*Storage, error) {
 		return nil, fmt.Errorf("%s : %s", "Failed to create Moderation table", err)
 	}
 
-	return &Storage{db: db}, nil
+	cnf := config.MustLoad()
+	db.SetMaxOpenConns(cnf.ParamDB.MaxOpenConnections)
+	db.SetMaxIdleConns(cnf.ParamDB.MaxIdleConnections)
+	db.SetConnMaxLifetime(cnf.ParamDB.MaxLifeTime)
+
+	return &Storage{Db: db}, nil
 
 }
 

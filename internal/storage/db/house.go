@@ -7,7 +7,7 @@ import (
 
 func (storage *Storage) CreateHouse(address string, developer string, year int) (api.House, error) {
 	var newHouse api.House
-	stmt, err := storage.db.Prepare("INSERT INTO House(address, developer, year, created_at, update_at) VALUES ($1, $2, $3, NOW(), NOW()) RETURNING id, address, developer, year, created_at, update_at ")
+	stmt, err := storage.Db.Prepare("INSERT INTO House(address, developer, year, created_at, update_at) VALUES ($1, $2, $3, NOW(), NOW()) RETURNING id, address, developer, year, created_at, update_at ")
 	if err != nil {
 		return newHouse, fmt.Errorf("error in CreateHouse Prepare: %s", err)
 	}
@@ -21,7 +21,7 @@ func (storage *Storage) CreateHouse(address string, developer string, year int) 
 }
 
 func (storage *Storage) UpdateHouse(houseId int) error {
-	stmt, err := storage.db.Prepare("UPDATE House SET update_at = Now() WHERE id=$1;")
+	stmt, err := storage.Db.Prepare("UPDATE House SET update_at = Now() WHERE id=$1;")
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %s", err)
 	}
@@ -37,7 +37,7 @@ func (storage *Storage) GetAllFlats(houseId int, userType string) ([]api.Flat, e
 	switch userType {
 	case api.Moderator:
 		{
-			stmt, err := storage.db.Prepare("SELECT id, house_id, price, rooms, status FROM Apartments WHERE house_id=$1")
+			stmt, err := storage.Db.Prepare("SELECT id, house_id, price, rooms, status FROM Apartments WHERE house_id=$1")
 			if err != nil {
 				return flats, fmt.Errorf("error in Prapare request in GetAllFlats: %s", err)
 			}
@@ -57,7 +57,7 @@ func (storage *Storage) GetAllFlats(houseId int, userType string) ([]api.Flat, e
 		}
 	case api.Client:
 		{
-			stmt, err := storage.db.Prepare("SELECT id, house_id, price, rooms, status FROM Apartments WHERE house_id=$1 AND status=$2")
+			stmt, err := storage.Db.Prepare("SELECT id, house_id, price, rooms, status FROM Apartments WHERE house_id=$1 AND status=$2")
 			if err != nil {
 				return flats, fmt.Errorf("error in Prapare request in GetAllFlats: %s", err)
 			}
@@ -77,7 +77,7 @@ func (storage *Storage) GetAllFlats(houseId int, userType string) ([]api.Flat, e
 		}
 	default:
 		{
-			stmt, err := storage.db.Prepare("SELECT id, house_id, price, rooms, status FROM Apartments WHERE house_id=$1 AND status=$2")
+			stmt, err := storage.Db.Prepare("SELECT id, house_id, price, rooms, status FROM Apartments WHERE house_id=$1 AND status=$2")
 			if err != nil {
 				return flats, fmt.Errorf("error in Prapare request in GetAllFlats: %s", err)
 			}

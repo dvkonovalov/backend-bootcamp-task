@@ -1,5 +1,10 @@
 env: "local"
 http_server:
   address: "0.0.0.0:8080"
-  timeout: 1s
+  timeout: 500ms
   idle_timeout: 60s
+
+param_db:
+  max_open_connections: 100
+  max_idle_connections: 100
+  max_life_time: 300s

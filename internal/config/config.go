@@ -8,14 +8,21 @@ import (
 )
 
 type Config struct {
-	Env        string     `yaml:"env" env-default:"production" env-required:"true"`
-	HttpServer HTTPServer `yaml:"http_server" env-required:"true"`
+	Env        string      `yaml:"env" env-default:"production" env-required:"true"`
+	HttpServer HTTPServer  `yaml:"http_server" env-required:"true"`
+	ParamDB    ParametrsDB `yaml:"param_db" env-required:"true"`
 }
 
 type HTTPServer struct {
 	Address     string        `yaml:"address" env-required:"true"`
 	Timeout     time.Duration `yaml:"timeout" env-default:"5" env-required:"true"`
 	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"5" env-required:"true"`
+}
+
+type ParametrsDB struct {
+	MaxOpenConnections int           `yaml:"max_open_connections" env-default:"100" env-required:"true"`
+	MaxIdleConnections int           `yaml:"max_idle_connections" env-default:"100" env-required:"true"`
+	MaxLifeTime        time.Duration `yaml:"max_life_time" env-default:"300" env-required:"true"`
 }
 
 func MustLoad() *Config {

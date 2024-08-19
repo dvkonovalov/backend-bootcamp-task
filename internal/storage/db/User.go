@@ -10,7 +10,7 @@ import (
 
 func (storage *Storage) CreateUser(email string, password string, userType string) (string, error) {
 	var id string
-	stmt, err := storage.db.Prepare("SELECT id from Users WHERE email = $1;")
+	stmt, err := storage.Db.Prepare("SELECT id from Users WHERE email = $1;")
 	if err != nil {
 		return id, fmt.Errorf("error preparing statement: %s", err)
 	}
@@ -23,7 +23,7 @@ func (storage *Storage) CreateUser(email string, password string, userType strin
 		return id, fmt.Errorf("user already exists")
 	}
 
-	stmt, err = storage.db.Prepare("INSERT INTO Users (email, password_hash, user_type) VALUES ($1, $2, $3) RETURNING id;")
+	stmt, err = storage.Db.Prepare("INSERT INTO Users (email, password_hash, user_type) VALUES ($1, $2, $3) RETURNING id;")
 	if err != nil {
 		return id, fmt.Errorf("error preparing statement: %s", err)
 	}
@@ -46,7 +46,7 @@ func (storage *Storage) CreateUser(email string, password string, userType strin
 func (storage *Storage) LoginUser(id string, password string) (string, error) {
 	var findId int
 	var passwordHash, userType string
-	stmt, err := storage.db.Prepare("SELECT id, password_hash, user_type from Users WHERE id = $1;")
+	stmt, err := storage.Db.Prepare("SELECT id, password_hash, user_type from Users WHERE id = $1;")
 	if err != nil {
 		return "", fmt.Errorf("error preparing statement: %s", err)
 	}
