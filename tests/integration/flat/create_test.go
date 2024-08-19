@@ -43,7 +43,27 @@ func TestCreateEndPoint(t *testing.T) {
 		t.Errorf("Unexpected token: got %v want token", responseBody.Token)
 	}
 
-	// Нормальный запрос
+	// Создаем дом
+	body = []byte(`{
+	  "address": "Лесная улица, 7, Москва, 125196",
+	  "year": 2000,
+	  "developer": "Мэрия города"
+	}`)
+	rbody = bytes.NewReader(body)
+	req, err = http.NewRequest("GET", "http://127.0.0.1:8080/house/create", rbody)
+	if err != nil {
+		t.Errorf("Error creating http request: %v", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+responseBody.Token)
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Errorf("Error making http request: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Unexpected http status code: %v", resp.StatusCode)
+	}
+
+	//Нормальный запрос
 	body = []byte(`{
 	  "house_id": 1,
 	  "price": 10000,
