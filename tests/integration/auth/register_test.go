@@ -14,7 +14,7 @@ type ResponseBodyRegister struct {
 
 func TestRegisterEndPoint(t *testing.T) {
 	body := []byte(`{
-  "email": "test@gmail.com",
+  "email": "test1234g@gmail.com",
   "password": "Секретная строка",
   "user_type": "moderator"
 }`)
