@@ -1,14 +1,17 @@
 package flat
 
 import (
+	"context"
 	"errors"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
 	"log/slog"
+	"main/internal/http_server/mailsender"
 	"main/internal/http_server/middleware"
 	"main/internal/storage/api"
 	"main/internal/storage/api/responses"
 	"net/http"
+	"strconv"
 )
 
 type RequestUpdate struct {
@@ -26,7 +29,11 @@ type UpdaterFlat interface {
 	BlockModerationOtherAdmin(flatId int, moderator string) (bool, error)
 }
 
-func Update(log *slog.Logger, flatUpdater UpdaterFlat) http.HandlerFunc {
+type UpdaterSubscribe interface {
+	GetHouseSubscribers(ctx context.Context, houseID string) ([]string, error)
+}
+
+func Update(log *slog.Logger, mailSender *mailsender.Sender, flatUpdater UpdaterFlat, subscribeUpdater UpdaterSubscribe) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userStatus, err := middleware.CheckJWTToken(r)
 		if err != nil {
@@ -80,23 +87,41 @@ func Update(log *slog.Logger, flatUpdater UpdaterFlat) http.HandlerFunc {
 			return
 		}
 		log.Info("update flat", "updateFlat", updateFlat)
+		if req.Status == api.OnModeration {
+			res, err := flatUpdater.BlockModerationOtherAdmin(req.Id, usernameAdmin)
+			if err != nil {
+				log.Error("fail to flat/update block flat with moderator", "err", err)
+				err := responses.ServerError(w, r, "fail to flat/update block flat with moderator", 22)
+				if err != nil {
+					log.Error("fail to send server error code", "err", err)
+				}
+				return
+			}
+			if res == false {
+				log.Error("fail to flat/update block flat with moderator", "res", res)
+				err := responses.ServerError(w, r, "fail to flat/update block flat with moderator", 22)
+				if err != nil {
+					log.Error("fail to send server error code", "err", err)
+				}
+				return
+			}
 
-		res, err := flatUpdater.BlockModerationOtherAdmin(req.Id, usernameAdmin)
-		if err != nil {
-			log.Error("fail to flat/update block flat with moderator", "err", err)
-			err := responses.ServerError(w, r, "fail to flat/update block flat with moderator", 22)
-			if err != nil {
-				log.Error("fail to send server error code", "err", err)
-			}
-			return
-		}
-		if res == false {
-			log.Error("fail to flat/update block flat with moderator", "res", res)
-			err := responses.ServerError(w, r, "fail to flat/update block flat with moderator", 22)
-			if err != nil {
-				log.Error("fail to send server error code", "err", err)
-			}
-			return
+		} else if req.Status == api.Approved {
+			// Уведомление подписчиков
+			go func() {
+				subscribers, err := subscribeUpdater.GetHouseSubscribers(context.Background(), strconv.Itoa(updateFlat.HouseId))
+				if err != nil {
+					log.Error("Failed to get subscribers", err)
+					return
+				}
+
+				for _, email := range subscribers {
+					err := mailSender.SendEmail(context.Background(), email, "New flat available!")
+					if err != nil {
+						log.Error("Failed to send email", err)
+					}
+				}
+			}()
 		}
 
 		render.JSON(w, r, ResponseUpdate{Flat: updateFlat})

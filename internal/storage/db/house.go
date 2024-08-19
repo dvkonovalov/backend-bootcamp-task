@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"main/internal/storage/api"
 )
@@ -98,4 +99,33 @@ func (storage *Storage) GetAllFlats(houseId int, userType string) ([]api.Flat, e
 		}
 
 	}
+}
+
+func (storage *Storage) SubscribeToHouse(ctx context.Context, houseID string, email string) error {
+	_, err := storage.Db.ExecContext(ctx, `
+		INSERT INTO house_subscriptions (house_id, user_email)
+		VALUES ($1, $2)
+	`, houseID, email)
+	return err
+}
+
+func (storage *Storage) GetHouseSubscribers(ctx context.Context, houseID string) ([]string, error) {
+	rows, err := storage.Db.QueryContext(ctx, `
+		SELECT user_email FROM house_subscriptions WHERE house_id = $1
+	`, houseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var emails []string
+	for rows.Next() {
+		var email string
+		if err := rows.Scan(&email); err != nil {
+			return nil, err
+		}
+		emails = append(emails, email)
+	}
+
+	return emails, nil
 }

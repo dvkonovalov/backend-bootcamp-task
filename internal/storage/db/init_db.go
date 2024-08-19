@@ -72,6 +72,16 @@ func NewStorage(storagePath string) (*Storage, error) {
 		return nil, fmt.Errorf("%s : %s", "Failed to create Moderation table", err)
 	}
 
+	sqlRequest = `CREATE TABLE house_subscriptions (
+		id SERIAL PRIMARY KEY,
+		house_id INT REFERENCES House(id),
+		user_email VARCHAR(255) NOT NULL
+	);`
+	err = CreateTable(sqlRequest, db)
+	if err != nil {
+		return nil, fmt.Errorf("%s : %s", "Failed to create house_subscriptions table", err)
+	}
+
 	cnf := config.MustLoad()
 	db.SetMaxOpenConns(cnf.ParamDB.MaxOpenConnections)
 	db.SetMaxIdleConns(cnf.ParamDB.MaxIdleConnections)
