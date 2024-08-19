@@ -18,7 +18,7 @@ type ResponseBodyCreate struct {
 }
 
 func TestCreateEndPoint(t *testing.T) {
-	body := []byte(`{"user_type":"client"}`)
+	body := []byte(`{"user_type":"moderator"}`)
 	rbody := bytes.NewReader(body)
 	req, err := http.NewRequest("GET", "http://127.0.0.1:8080/dummyLogin", rbody)
 	if err != nil {
