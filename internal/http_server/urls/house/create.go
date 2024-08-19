@@ -1,6 +1,7 @@
 package house
 
 import (
+	"errors"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
 	"log/slog"
@@ -19,11 +20,11 @@ type Response struct {
 	api.House
 }
 
-type HouseCreater interface {
+type CreaterHouse interface {
 	CreateHouse(address string, developer string, year int) (api.House, error)
 }
 
-func Create(log *slog.Logger, houseCreater HouseCreater) http.HandlerFunc {
+func Create(log *slog.Logger, houseCreater CreaterHouse) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userStatus, err := middleware.CheckJWTToken(r)
 		if err != nil {
@@ -45,13 +46,14 @@ func Create(log *slog.Logger, houseCreater HouseCreater) http.HandlerFunc {
 
 		err = validator.New().Struct(req)
 		if err != nil {
-			validatorErr := err.(validator.ValidationErrors)
+			var validatorErr validator.ValidationErrors
+			errors.As(err, &validatorErr)
 			log.Error("fail to validate body", "err", validatorErr)
 			http.Error(w, "fail to validate body", http.StatusBadRequest)
 			return
 		}
-		var new_house api.House
-		new_house, err = houseCreater.CreateHouse(
+		var newHouse api.House
+		newHouse, err = houseCreater.CreateHouse(
 			req.Address,
 			req.Developer,
 			req.Year,
@@ -61,9 +63,9 @@ func Create(log *slog.Logger, houseCreater HouseCreater) http.HandlerFunc {
 			http.Error(w, "fail to create house", http.StatusInternalServerError)
 			return
 		}
-		log.Info("created house", "new_house", new_house)
+		log.Info("created house", "newHouse", newHouse)
 
-		render.JSON(w, r, Response{House: new_house})
+		render.JSON(w, r, Response{House: newHouse})
 
 	}
 

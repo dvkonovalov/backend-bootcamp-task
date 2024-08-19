@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
 	"log/slog"
@@ -23,14 +24,15 @@ func CreateToken(log *slog.Logger) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("fail to decode body", "err", err)
-			render.JSON(w, r, api.Error("failed to decode request."))
+			http.Error(w, "fail to decode body", http.StatusInternalServerError)
 			return
 		}
 		log.Info("request body decoded", slog.Any("req", req))
 
 		err = validator.New().Struct(req)
 		if err != nil {
-			validatorErr := err.(validator.ValidationErrors)
+			var validatorErr validator.ValidationErrors
+			errors.As(err, &validatorErr)
 			log.Error("fail to validate body", "err", validatorErr)
 			http.Error(w, "Not found user type", http.StatusBadRequest)
 			return

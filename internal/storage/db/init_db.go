@@ -58,6 +58,19 @@ func NewStorage(storagePath string) (*Storage, error) {
 		return nil, fmt.Errorf("%s : %s", "Failed to create Users table", err)
 	}
 
+	sqlRequest = `CREATE TABLE IF NOT EXISTS Moderation (
+		id SERIAL PRIMARY KEY,
+		flat_id INT NOT NULL,
+		moderator TEXT NOT NULL,
+		FOREIGN KEY (flat_id) REFERENCES Apartments(id) ON DELETE CASCADE
+	);
+    `
+
+	err = CreateTable(sqlRequest, db)
+	if err != nil {
+		return nil, fmt.Errorf("%s : %s", "Failed to create Moderation table", err)
+	}
+
 	return &Storage{db: db}, nil
 
 }

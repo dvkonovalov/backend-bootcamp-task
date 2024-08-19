@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"main/internal/http_server/middleware"
@@ -9,66 +10,65 @@ import (
 
 func (storage *Storage) CreateUser(email string, password string, userType string) (string, error) {
 	var id string
-	var count = 0
 	stmt, err := storage.db.Prepare("SELECT id from Users WHERE email = $1;")
 	if err != nil {
-		return id, fmt.Errorf("Error preparing statement: %s", err)
+		return id, fmt.Errorf("error preparing statement: %s", err)
 	}
 	err = stmt.QueryRow(email).Scan(&id)
 
-	if err != nil && err != sql.ErrNoRows {
-		return id, fmt.Errorf("Error executing query: %s", err)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return id, fmt.Errorf("error executing query: %s", err)
 	}
-	if count > 0 {
-		return id, fmt.Errorf("User already exists")
+	if id != "" {
+		return id, fmt.Errorf("user already exists")
 	}
 
 	stmt, err = storage.db.Prepare("INSERT INTO Users (email, password_hash, user_type) VALUES ($1, $2, $3) RETURNING id;")
 	if err != nil {
-		return id, fmt.Errorf("Error preparing statement: %s", err)
+		return id, fmt.Errorf("error preparing statement: %s", err)
 	}
 	if password == "" {
-		return id, fmt.Errorf("Password is empty")
+		return id, fmt.Errorf("password is empty")
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return id, fmt.Errorf("Error in calc Hash password", "err", err)
+		return id, fmt.Errorf("error in calc Hash password. Error: %s", err)
 	}
 	err = stmt.QueryRow(email, hashedPassword, userType).Scan(&id)
 
 	if err != nil {
-		return id, fmt.Errorf("Error executing query: %s", err)
+		return id, fmt.Errorf("error executing query: %s", err)
 	}
 
 	return id, nil
 }
 
 func (storage *Storage) LoginUser(id string, password string) (string, error) {
-	var find_id int
-	var password_hash, userType string
+	var findId int
+	var passwordHash, userType string
 	stmt, err := storage.db.Prepare("SELECT id, password_hash, user_type from Users WHERE id = $1;")
 	if err != nil {
-		return "", fmt.Errorf("Error preparing statement: %s", err)
+		return "", fmt.Errorf("error preparing statement: %s", err)
 	}
-	err = stmt.QueryRow(id).Scan(&find_id, &password_hash, &userType)
+	err = stmt.QueryRow(id).Scan(&findId, &passwordHash, &userType)
 
 	if err != nil {
-		return "", fmt.Errorf("Error executing query: %s", err)
+		return "", fmt.Errorf("error executing query: %s", err)
 	}
-	if find_id == 0 {
-		return "", fmt.Errorf("User not found")
+	if findId == 0 {
+		return "", fmt.Errorf("user not found")
 	}
 
 	if password == "" {
-		return "", fmt.Errorf("Password is empty")
+		return "", fmt.Errorf("password is empty")
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(password_hash), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password))
 	if err != nil {
-		return "", fmt.Errorf("Invalid password", "err", err)
+		return "", fmt.Errorf("invalid password. Error: %s", err)
 	}
 	jwtToken, err := middleware.CreateJWTToken(id, userType)
 	if err != nil {
-		return "", fmt.Errorf("Error generating JWT token", "err", err)
+		return "", fmt.Errorf("error generating JWT token. Error: %s", err)
 	}
 	return jwtToken, nil
 }

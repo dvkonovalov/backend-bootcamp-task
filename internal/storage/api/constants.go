@@ -10,4 +10,5 @@ const (
 	Approved     = "approved"
 	Declined     = "declined"
 	OnModeration = "on moderation"
+	_            = Declined
 )

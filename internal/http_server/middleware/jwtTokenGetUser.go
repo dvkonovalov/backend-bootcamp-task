@@ -9,9 +9,8 @@ import (
 	"strings"
 )
 
-func CheckJWTToken(r *http.Request) (string, error) {
+func CheckGetUser(r *http.Request) (string, error) {
 	authHeader := r.Header.Get("Authorization")
-	//mySecretKey := []byte("secret")
 	mySecretKey := []byte(os.Getenv("JWT_SECRET_KEY"))
 	if authHeader == "" {
 		return "", fmt.Errorf("authorization header is missing")
@@ -26,7 +25,6 @@ func CheckJWTToken(r *http.Request) (string, error) {
 		return mySecretKey, nil
 	}
 
-	// Разбор токена
 	claims := &api.Claims{}
 	parsedToken, err := jwt.ParseWithClaims(tokenString, claims, keyFunc)
 	if err != nil {
@@ -37,5 +35,5 @@ func CheckJWTToken(r *http.Request) (string, error) {
 		return "", fmt.Errorf("invalid token")
 	}
 
-	return claims.Status, nil
+	return claims.Username, nil
 }

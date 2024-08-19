@@ -16,7 +16,7 @@ func CreateJWTToken(username string, userType string) (string, error) {
 	// Подписываем токен нашим секретным ключем
 	tokenString, err := token.SignedString(mySecretKey)
 	if err != nil {
-		return "", fmt.Errorf("fail to sign token", "err", err)
+		return "", fmt.Errorf("fail to sign token. Error: %s", err)
 	}
 	return tokenString, nil
 }

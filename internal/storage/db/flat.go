@@ -5,51 +5,101 @@ import (
 	"main/internal/storage/api"
 )
 
-func (storage *Storage) CreateFlat(house_id int, price int, rooms int) (api.Flat, error) {
-	var new_flat api.Flat
+func (storage *Storage) CreateFlat(houseId int, price int, rooms int) (api.Flat, error) {
+	var newFlat api.Flat
 	stmt, err := storage.db.Prepare("INSERT INTO Apartments (house_id, price, rooms, status) VALUES ($1, $2, $3, 'created') RETURNING id, house_id, price, rooms, status;")
 	if err != nil {
-		return new_flat, fmt.Errorf("Error preparing statement: %s", err)
+		return newFlat, fmt.Errorf("error preparing statement: %s", err)
 	}
-	err = stmt.QueryRow(house_id, price, rooms).Scan(&new_flat.Id, &new_flat.House_id, &new_flat.Price, &new_flat.Rooms, &new_flat.Status)
+	err = stmt.QueryRow(houseId, price, rooms).Scan(&newFlat.Id, &newFlat.HouseId, &newFlat.Price, &newFlat.Rooms, &newFlat.Status)
 
 	if err != nil {
-		return new_flat, fmt.Errorf("Error executing query: %s", err)
+		return newFlat, fmt.Errorf("error executing query: %s", err)
 	}
-	err = storage.UpdateHouse(house_id)
+	err = storage.UpdateHouse(houseId)
 	if err != nil {
-		return new_flat, fmt.Errorf("Error updating house: %s", err)
+		return newFlat, fmt.Errorf("error updating house: %s", err)
 	}
-	return new_flat, nil
+	return newFlat, nil
 }
 
-func (storage *Storage) UpdateFlat(id int, status string) (api.Flat, error) {
-	var update_flat api.Flat
-	stmt, err := storage.db.Prepare("UPDATE Apartments SET status=$1 WHERE id=$2 RETURNING id, house_id, price, rooms, status;")
-	if err != nil {
-		return update_flat, fmt.Errorf("Error preparing statement: %s", err)
-	}
-	err = stmt.QueryRow(status, id).Scan(&update_flat.Id, &update_flat.House_id, &update_flat.Price, &update_flat.Rooms, &update_flat.Status)
+func (storage *Storage) UpdateFlat(id int, status string, moderator string) (api.Flat, error) {
+	var updateFlat api.Flat
 
+	statusNow, err := storage.GetStatus(id)
 	if err != nil {
-		return update_flat, fmt.Errorf("Error executing query: %s", err)
+		return updateFlat, fmt.Errorf("error getting status for id %d: %s", id, err)
 	}
 
-	return update_flat, nil
+	if statusNow == api.OnModeration {
+		var moderatorNow string
+		stmt, err := storage.db.Prepare("SELECT moderator FROM Moderation WHERE flat_id=$1;")
+		if err != nil {
+			return updateFlat, fmt.Errorf("error preparing statement: %s", err)
+		}
+		err = stmt.QueryRow(id).Scan(&moderatorNow)
+		if err != nil {
+			return updateFlat, fmt.Errorf("error executing query: %s", err)
+		}
+		if moderator != moderatorNow {
+			return updateFlat, fmt.Errorf("this apartment is being moderated by %s, but %s wants to moderate it", moderatorNow, moderator)
+		}
+
+		stmt, err = storage.db.Prepare("UPDATE Apartments SET status=$1 WHERE id=$2 RETURNING id, house_id, price, rooms, status;")
+		if err != nil {
+			return updateFlat, fmt.Errorf("error preparing statement: %s", err)
+		}
+		err = stmt.QueryRow(status, id).Scan(&updateFlat.Id, &updateFlat.HouseId, &updateFlat.Price, &updateFlat.Rooms, &updateFlat.Status)
+
+		if err != nil {
+			return updateFlat, fmt.Errorf("error executing query: %s", err)
+		}
+
+		return updateFlat, nil
+
+	} else {
+		stmt, err := storage.db.Prepare("UPDATE Apartments SET status=$1 WHERE id=$2 RETURNING id, house_id, price, rooms, status;")
+		if err != nil {
+			return updateFlat, fmt.Errorf("error preparing statement: %s", err)
+		}
+		err = stmt.QueryRow(status, id).Scan(&updateFlat.Id, &updateFlat.HouseId, &updateFlat.Price, &updateFlat.Rooms, &updateFlat.Status)
+
+		if err != nil {
+			return updateFlat, fmt.Errorf("error executing query: %s", err)
+		}
+
+		return updateFlat, nil
+	}
+
 }
 
 func (storage *Storage) GetStatus(id int) (string, error) {
 	var status string
 	stmt, err := storage.db.Prepare("SELECT status FROM Apartments WHERE id=$1;")
 	if err != nil {
-		return "", fmt.Errorf("Error preparing statement: %s", err)
+		return "", fmt.Errorf("error preparing statement: %s", err)
 	}
-	err = stmt.QueryRow(status, id).Scan(&status)
+	err = stmt.QueryRow(id).Scan(&status)
 
 	if err != nil {
-		return "", fmt.Errorf("Error executing query: %s", err)
+		return "", fmt.Errorf("error executing query: %s", err)
 	}
 
 	return status, nil
+
+}
+
+func (storage *Storage) BlockModerationOtherAdmin(flatId int, moderator string) (bool, error) {
+	stmt, err := storage.db.Prepare("INSERT INTO Moderation(flat_id, moderator) VALUES ($1, $2);")
+	if err != nil {
+		return false, fmt.Errorf("error preparing statement: %s", err)
+	}
+	_, err = stmt.Exec(flatId, moderator)
+
+	if err != nil {
+		return false, fmt.Errorf("error executing query: %s", err)
+	}
+
+	return true, nil
 
 }

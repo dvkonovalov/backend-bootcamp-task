@@ -1,6 +1,7 @@
 package flat
 
 import (
+	"errors"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
 	"log/slog"
@@ -9,21 +10,21 @@ import (
 	"net/http"
 )
 
-type Request_create struct {
-	House_id int `json:"house_id" validate:"required"`
-	Price    int `json:"price" validate:"required"`
-	Rooms    int `json:"rooms,omitempty"`
+type RequestCreate struct {
+	HouseId int `json:"house_id" validate:"required"`
+	Price   int `json:"price" validate:"required"`
+	Rooms   int `json:"rooms,omitempty"`
 }
 
-type Response_create struct {
+type ResponseCreate struct {
 	api.Flat
 }
 
-type FlatCreator interface {
-	CreateFlat(house_id int, price int, rooms int) (api.Flat, error)
+type CreatorFlat interface {
+	CreateFlat(houseId int, price int, rooms int) (api.Flat, error)
 }
 
-func Create(log *slog.Logger, flatCreater FlatCreator) http.HandlerFunc {
+func Create(log *slog.Logger, flatCreater CreatorFlat) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userStatus, err := middleware.CheckJWTToken(r)
 		if err != nil {
@@ -34,7 +35,7 @@ func Create(log *slog.Logger, flatCreater FlatCreator) http.HandlerFunc {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		var req Request_create
+		var req RequestCreate
 		err = render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("fail to decode body", "err", err)
@@ -45,14 +46,15 @@ func Create(log *slog.Logger, flatCreater FlatCreator) http.HandlerFunc {
 
 		err = validator.New().Struct(req)
 		if err != nil {
-			validatorErr := err.(validator.ValidationErrors)
+			var validatorErr validator.ValidationErrors
+			errors.As(err, &validatorErr)
 			log.Error("fail to validate body", "err", validatorErr)
 			http.Error(w, "fail to validate body", http.StatusBadRequest)
 			return
 		}
-		var new_flat api.Flat
-		new_flat, err = flatCreater.CreateFlat(
-			req.House_id,
+		var newFlat api.Flat
+		newFlat, err = flatCreater.CreateFlat(
+			req.HouseId,
 			req.Price,
 			req.Rooms,
 		)
@@ -61,8 +63,8 @@ func Create(log *slog.Logger, flatCreater FlatCreator) http.HandlerFunc {
 			http.Error(w, "fail to create flat", http.StatusInternalServerError)
 			return
 		}
-		log.Info("created flat", "new_flat", new_flat)
+		log.Info("created flat", "newFlat", newFlat)
 
-		render.JSON(w, r, Response_create{Flat: new_flat})
+		render.JSON(w, r, ResponseCreate{Flat: newFlat})
 	}
 }

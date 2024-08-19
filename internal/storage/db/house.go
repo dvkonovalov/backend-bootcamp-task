@@ -6,50 +6,50 @@ import (
 )
 
 func (storage *Storage) CreateHouse(address string, developer string, year int) (api.House, error) {
-	var new_house api.House
+	var newHouse api.House
 	stmt, err := storage.db.Prepare("INSERT INTO House(address, developer, year, created_at, update_at) VALUES ($1, $2, $3, NOW(), NOW()) RETURNING id, address, developer, year, created_at, update_at ")
 	if err != nil {
-		return new_house, fmt.Errorf("Error in CreateHouse Prepare: %s", err)
+		return newHouse, fmt.Errorf("error in CreateHouse Prepare: %s", err)
 	}
 
-	err = stmt.QueryRow(address, developer, year).Scan(&new_house.Id, &new_house.Address, &new_house.Developer, &new_house.Year, &new_house.CreatedAt, &new_house.UpdateAt)
+	err = stmt.QueryRow(address, developer, year).Scan(&newHouse.Id, &newHouse.Address, &newHouse.Developer, &newHouse.Year, &newHouse.DateCreate, &newHouse.UpdateAt)
 	if err != nil {
-		return new_house, fmt.Errorf("Error in CreateHouse Exec: %s", err)
+		return newHouse, fmt.Errorf("error in CreateHouse Exec: %s", err)
 	}
 
-	return new_house, nil
+	return newHouse, nil
 }
 
-func (storage *Storage) UpdateHouse(house_id int) error {
+func (storage *Storage) UpdateHouse(houseId int) error {
 	stmt, err := storage.db.Prepare("UPDATE House SET update_at = Now() WHERE id=$1;")
 	if err != nil {
-		return fmt.Errorf("Error preparing statement: %s", err)
+		return fmt.Errorf("error preparing statement: %s", err)
 	}
-	_, err = stmt.Exec(house_id)
+	_, err = stmt.Exec(houseId)
 	if err != nil {
-		return fmt.Errorf("Error executing query: %s", err)
+		return fmt.Errorf("error executing query: %s", err)
 	}
 	return nil
 }
 
-func (storage *Storage) GetAllFlats(house_id int, userType string) ([]api.Flat, error) {
+func (storage *Storage) GetAllFlats(houseId int, userType string) ([]api.Flat, error) {
 	var flats []api.Flat
 	switch userType {
 	case api.Moderator:
 		{
 			stmt, err := storage.db.Prepare("SELECT id, house_id, price, rooms, status FROM Apartments WHERE house_id=$1")
 			if err != nil {
-				return flats, fmt.Errorf("Error in Prapare request in GetAllFlats: %s", err)
+				return flats, fmt.Errorf("error in Prapare request in GetAllFlats: %s", err)
 			}
-			rows, err := stmt.Query(house_id)
+			rows, err := stmt.Query(houseId)
 			if err != nil {
-				return flats, fmt.Errorf("Error Exec in GetAllFlats: %s", err)
+				return flats, fmt.Errorf("error Exec in GetAllFlats: %s", err)
 			}
 			for rows.Next() {
 				var flat api.Flat
-				err = rows.Scan(&flat.Id, &flat.House_id, &flat.Price, &flat.Rooms, &flat.Status)
+				err = rows.Scan(&flat.Id, &flat.HouseId, &flat.Price, &flat.Rooms, &flat.Status)
 				if err != nil {
-					return flats, fmt.Errorf("Error getting data from a row in GetAllFlats: %s", err)
+					return flats, fmt.Errorf("error getting data from a row in GetAllFlats: %s", err)
 				}
 				flats = append(flats, flat)
 			}
@@ -59,17 +59,17 @@ func (storage *Storage) GetAllFlats(house_id int, userType string) ([]api.Flat, 
 		{
 			stmt, err := storage.db.Prepare("SELECT id, house_id, price, rooms, status FROM Apartments WHERE house_id=$1 AND status=$2")
 			if err != nil {
-				return flats, fmt.Errorf("Error in Prapare request in GetAllFlats: %s", err)
+				return flats, fmt.Errorf("error in Prapare request in GetAllFlats: %s", err)
 			}
-			rows, err := stmt.Query(house_id, api.Approved)
+			rows, err := stmt.Query(houseId, api.Approved)
 			if err != nil {
-				return flats, fmt.Errorf("Error Exec in GetAllFlats: %s", err)
+				return flats, fmt.Errorf("error Exec in GetAllFlats: %s", err)
 			}
 			for rows.Next() {
 				var flat api.Flat
-				err = rows.Scan(&flat.Id, &flat.House_id, &flat.Price, &flat.Rooms, &flat.Status)
+				err = rows.Scan(&flat.Id, &flat.HouseId, &flat.Price, &flat.Rooms, &flat.Status)
 				if err != nil {
-					return flats, fmt.Errorf("Error getting data from a row in GetAllFlats: %s", err)
+					return flats, fmt.Errorf("error getting data from a row in GetAllFlats: %s", err)
 				}
 				flats = append(flats, flat)
 			}
@@ -79,17 +79,17 @@ func (storage *Storage) GetAllFlats(house_id int, userType string) ([]api.Flat, 
 		{
 			stmt, err := storage.db.Prepare("SELECT id, house_id, price, rooms, status FROM Apartments WHERE house_id=$1 AND status=$2")
 			if err != nil {
-				return flats, fmt.Errorf("Error in Prapare request in GetAllFlats: %s", err)
+				return flats, fmt.Errorf("error in Prapare request in GetAllFlats: %s", err)
 			}
-			rows, err := stmt.Query(house_id, api.Approved)
+			rows, err := stmt.Query(houseId, api.Approved)
 			if err != nil {
-				return flats, fmt.Errorf("Error Exec in GetAllFlats: %s", err)
+				return flats, fmt.Errorf("error Exec in GetAllFlats: %s", err)
 			}
 			for rows.Next() {
 				var flat api.Flat
-				err = rows.Scan(&flat.Id, &flat.House_id, &flat.Price, &flat.Rooms, &flat.Status)
+				err = rows.Scan(&flat.Id, &flat.HouseId, &flat.Price, &flat.Rooms, &flat.Status)
 				if err != nil {
-					return flats, fmt.Errorf("Error getting data from a row in GetAllFlats: %s", err)
+					return flats, fmt.Errorf("error getting data from a row in GetAllFlats: %s", err)
 				}
 				flats = append(flats, flat)
 			}

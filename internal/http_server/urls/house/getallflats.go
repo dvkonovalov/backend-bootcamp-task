@@ -15,7 +15,7 @@ type ResponseGetAllFlats struct {
 }
 
 type AllFlatsGetter interface {
-	GetAllFlats(house_id int, userType string) ([]api.Flat, error)
+	GetAllFlats(houseId int, userType string) ([]api.Flat, error)
 }
 
 func GetFlats(log *slog.Logger, allFlatsGetter AllFlatsGetter) http.HandlerFunc {

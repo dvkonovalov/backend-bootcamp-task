@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
 	"log/slog"
@@ -35,7 +36,8 @@ func CreateUser(log *slog.Logger, userRegister UserRegister) http.HandlerFunc {
 
 		err = validator.New().Struct(req)
 		if err != nil {
-			validatorErr := err.(validator.ValidationErrors)
+			var validatorErr validator.ValidationErrors
+			errors.As(err, &validatorErr)
 			log.Error("fail to validate body", "err", validatorErr)
 			http.Error(w, "Not found required data", http.StatusBadRequest)
 			return
