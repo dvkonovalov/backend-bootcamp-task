@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"main/internal/http_server/middleware"
 	"main/internal/storage/api"
+	"main/internal/storage/api/responses"
 	"net/http"
 	"strconv"
 )
@@ -45,7 +46,10 @@ func GetFlats(log *slog.Logger, allFlatsGetter AllFlatsGetter) http.HandlerFunc 
 		flats, err = allFlatsGetter.GetAllFlats(id, userType)
 		if err != nil {
 			log.Error("fail to get all flats", "err", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to get all flats", 23)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 		log.Info("Get all flat in house", "flats", flats)

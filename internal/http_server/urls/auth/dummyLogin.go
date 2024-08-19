@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"main/internal/http_server/middleware"
 	"main/internal/storage/api"
+	"main/internal/storage/api/responses"
 	"net/http"
 )
 
@@ -24,7 +25,10 @@ func CreateToken(log *slog.Logger) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("fail to decode body", "err", err)
-			http.Error(w, "fail to decode body", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to decode body", 1)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 		log.Info("request body decoded", slog.Any("req", req))
@@ -47,7 +51,10 @@ func CreateToken(log *slog.Logger) http.HandlerFunc {
 		tokenString, err := middleware.CreateJWTToken("Simple", req.UserType)
 		if err != nil {
 			log.Error("fail to create token", "err", err)
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to create token", 10)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 

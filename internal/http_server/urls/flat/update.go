@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"main/internal/http_server/middleware"
 	"main/internal/storage/api"
+	"main/internal/storage/api/responses"
 	"net/http"
 )
 
@@ -40,7 +41,10 @@ func Update(log *slog.Logger, flatUpdater UpdaterFlat) http.HandlerFunc {
 		err = render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("fail to decode body", "err", err)
-			http.Error(w, "fail to decode body", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to decode body", 1)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 		log.Info("request body decoded", slog.Any("req", req))
@@ -57,7 +61,10 @@ func Update(log *slog.Logger, flatUpdater UpdaterFlat) http.HandlerFunc {
 		usernameAdmin, err := middleware.CheckGetUser(r)
 		if err != nil {
 			log.Error("fail to check user in flat/update", "err", err)
-			http.Error(w, "fail to check user", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to check user in flat/update", 21)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 
@@ -77,12 +84,18 @@ func Update(log *slog.Logger, flatUpdater UpdaterFlat) http.HandlerFunc {
 		res, err := flatUpdater.BlockModerationOtherAdmin(req.Id, usernameAdmin)
 		if err != nil {
 			log.Error("fail to flat/update block flat with moderator", "err", err)
-			http.Error(w, "fail to flat/update block flat with moderator", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to flat/update block flat with moderator", 22)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 		if res == false {
 			log.Error("fail to flat/update block flat with moderator", "res", res)
-			http.Error(w, "fail to flat/update block flat with moderator", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to flat/update block flat with moderator", 22)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 

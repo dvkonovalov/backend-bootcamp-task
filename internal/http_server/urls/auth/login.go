@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
 	"log/slog"
+	"main/internal/storage/api/responses"
 	"net/http"
 )
 
@@ -27,7 +28,10 @@ func LoginUser(log *slog.Logger, userLogin UserLogin) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("fail to decode body", "err", err)
-			http.Error(w, "fail to decode body", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to decode body", 1)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 		log.Info("request body decoded", slog.Any("req", req))

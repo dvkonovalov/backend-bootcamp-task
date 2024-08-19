@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator"
 	"log/slog"
 	"main/internal/storage/api"
+	"main/internal/storage/api/responses"
 	"net/http"
 )
 
@@ -29,7 +30,10 @@ func CreateUser(log *slog.Logger, userRegister UserRegister) http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("fail to decode body", "err", err)
-			http.Error(w, "fail to decode body", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to decode body", 1)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 		log.Info("request body decoded", slog.Any("req", req))
@@ -52,7 +56,10 @@ func CreateUser(log *slog.Logger, userRegister UserRegister) http.HandlerFunc {
 		id, err := userRegister.CreateUser(req.Email, req.Password, req.UserType)
 		if err != nil {
 			log.Error("fail to create user", "err", err)
-			http.Error(w, "fail to create user", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to create user", 20)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 		render.JSON(w, r, ResponseRegister{UserId: id})

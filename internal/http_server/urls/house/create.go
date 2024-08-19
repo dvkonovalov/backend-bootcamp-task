@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"main/internal/http_server/middleware"
 	"main/internal/storage/api"
+	"main/internal/storage/api/responses"
 	"net/http"
 )
 
@@ -39,7 +40,10 @@ func Create(log *slog.Logger, houseCreater CreaterHouse) http.HandlerFunc {
 		err = render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("fail to decode body", "err", err)
-			http.Error(w, "fail to decode body", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to decode body", 1)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 		log.Info("request body decoded", slog.Any("req", req))
@@ -60,7 +64,10 @@ func Create(log *slog.Logger, houseCreater CreaterHouse) http.HandlerFunc {
 		)
 		if err != nil {
 			log.Error("fail to create house", "err", err)
-			http.Error(w, "fail to create house", http.StatusInternalServerError)
+			err := responses.ServerError(w, r, "fail to create house", 12)
+			if err != nil {
+				log.Error("fail to send server error code", "err", err)
+			}
 			return
 		}
 		log.Info("created house", "newHouse", newHouse)

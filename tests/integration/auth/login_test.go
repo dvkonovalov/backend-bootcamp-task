@@ -11,7 +11,7 @@ import (
 func TestLoginEndPoint(t *testing.T) {
 	password := "Секретная строка"
 	body := []byte(`{
-  "email": "test32@gmail.com",
+  "email": "test3223@gmail.com",
   "password": "Секретная строка",
   "user_type": "moderator"
 }`)
